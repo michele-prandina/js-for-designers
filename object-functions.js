@@ -471,3 +471,177 @@ let iifeeName = 'Mike';
 (function(name){
   console.log('hello' + name);
 }(iifeeName)); // if I invoke the expression, I can run it on the fly
+
+/*
+
+CALLBACK FUNCTION:
+it's a function you give to another function, to be run
+when the other function is finished.
+
+So the function you call (i.e. invoke), 'call's back' by calling
+the function you gave it when it finishes.
+
+*/
+
+function cbFoo() {
+  // Let's use closure feature to sit in memory a variable
+  // to use later on when the execution context of this function
+  // has run
+  var greetings = 'Hello';
+
+  setTimeout(function() { // anonymous function requested by setTimeout
+    // alert(greetings); // uncomment to test
+  }, 3000);
+
+};
+// Let's call our function.
+cbFoo();
+
+// Let's now create a callback function
+function tellMeWhenDone(callback) {
+  var a = 1000;
+  var b = 2000;
+
+  console.log('Work to do before callback...', a+b)
+
+  callback(); // the callback, it runs the function I gave it.
+};
+
+// let's invoke it!
+tellMeWhenDone(function() {
+  console.info('I want to inform you that the callback has executed');
+});
+
+
+/*
+
+CALL(), APPLY() and BIND()
+Have to do with 'this' keyword, that can point to the global object in
+some cases, or an object, if it sits inside a method of an object.
+
+What if you can control what 'this' keyword reepresent? You can do it
+using these three functions.
+
+We need to understand what FIRST-CLASS functions are.
+
+So, if functions are special object which have a code property that is invocable,
+and a name property, that can be anonymous, Function can have METHODs TO!
+
+These methods are:
+1- aplly()
+2- call()
+3- bind()
+
+all three have to do with 'this'.
+
+They create a copy of the original function!
+
+*/
+
+var objPerson = {
+  firstName: 'Jhon',
+  lastName: 'Doe',
+  getFullName: function() {
+
+    var fullName = this.firstName + ' ' + this.lastName;
+    return fullName;
+
+  }
+};
+
+// Example with BIND
+var logName = function() {
+  console.log('Logged:', this.getFullName());
+  console.log('Arguments:', ...arguments);
+  console.log('--------');
+}
+
+// EXAMPLE OF BIND
+// Let you set the this keyword about what to point
+// BUT it creates a copy of the function!
+// You can pass other vars as parameters
+var logPersonName = logName.bind(objPerson);
+logPersonName('Bind()',1,2,3);
+
+// EXAMPLE WITH CALL
+// it literally execute the function and you can set, as first parameter
+// the this keyword what to point at.
+// You can also pass other parameters.
+logName.call(objPerson, 'Call()', 1,2,3);
+
+// EXAMPLE WITH APPLY
+// It's exactly the same thing as call, instead variables passed as parameters
+// you have to pass ONE ARRAY, containg the variables
+logName.apply(objPerson, ['Apply()', 1,2,3]);
+
+
+// Real life example
+// FUNCTION BORROWING
+var objPerson2 = {
+  firstName: 'Jane',
+  lastName: 'Doe',
+};
+
+console.log('Borrowing function:', objPerson.getFullName.apply(objPerson2));
+
+// We can grab methods from other objects and use them with our objects,
+// as far we have the same property names.
+
+// FUNCTION CURRYING
+// With call and apply, passing parameters is just passing parameters...
+// But with bind, which make a copy of the function,
+// if you pass parameters...
+function multiply(a, b) {
+  return a * b;
+}
+
+// in order to use bind I need to create a new variable to host the new fn
+var multiplyByTwo = multiply.bind(this, 2);
+// passing parameters with bind set that parameter PERMANENTLY.
+// We set a to be a permanent value of 2.
+console.log('Multiplying... x2:', multiplyByTwo(5));
+
+/*
+
+FUNCTION CURRYING
+Creating a copy of the function BUT with some preset parameters.
+It's very helpull in mathematical situations.
+
+--------------------------------
+
+FUNCTIONAL PROGRAMMING
+used in program languages that use first-class functions
+
+
+*/
+function mapForEach(arr, foo) {
+  var newArr = [];
+
+  for(var i=0; i<arr.length; i++) {
+    newArr.push(
+      foo(arr[i])
+    );
+  };
+
+  return newArr;
+}
+
+var arr1 = [1,2,3];
+var arr2 = mapForEach(arr1, function(item) {
+  return item * 2;
+});
+console.log(arr2);
+
+var checkPastLimiter = function(limiter, item) {
+  return item > limiter;
+}
+
+var checkPastLimiterLite = function(limiter) {
+  return function(limiter, item) {
+    return item > limiter;
+  }.bind(this, limiter);
+}
+
+var arr3 = mapForEach(arr1, checkPastLimiterLite(0));
+
+console.log(arr3);
